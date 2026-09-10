@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "default": {
+      "apiTokenEnvName": "eced28f21c583cabaa2d9c69ae1124",
+      "logLevel": "NONE",
+      "migrations": {
+        "directory": "./migrations",
+        "modelApiKey": "schema_migration",
+        "template": "npx datocms migrations:new 'create_sticker_model'",
+        "tsconfig": ""
+      }
+    }
+  }
+}

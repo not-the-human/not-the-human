@@ -1,25 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
   Cpu,
   Languages,
   Send,
   Server,
   Loader2,
-  Globe,
   Radio,
   CheckCircle2,
   AlertTriangle,
   HardDriveDownload,
+  Key,
+  RefreshCcw,
 } from "lucide-react";
 import clsx from "clsx";
-
-const BACKENDS = [
-  { id: "nvidia", label: "NVIDIA NIM", desc: "Llama 3 runtime (default)" },
-  { id: "nebius", label: "Nebius AI Studio", desc: "Alternative cloud compute" },
-];
 
 const LANGUAGES = [
   { code: "sr", label: "Serbian" },
@@ -48,7 +43,6 @@ function calculateNdefBytes(records) {
 function parseNfcPayload(content) {
   if (!content || typeof content !== "string") return null;
 
-  // 1. Probaj direktan parse
   try {
     const parsed = JSON.parse(content);
     if (parsed.type === "nfc_payload" && Array.isArray(parsed.records)) {
@@ -56,7 +50,6 @@ function parseNfcPayload(content) {
     }
   } catch {}
 
-  // 2. Izdvoji sve JSON blokove koji počinju sa {"type":"nfc_payload"
   const matches = content.match(/\{"type"\s*:\s*"nfc_payload"[\s\S]*?\}\s*\]\s*\}/g);
   if (matches && matches.length > 0) {
     for (let i = matches.length - 1; i >= 0; i--) {
@@ -69,7 +62,6 @@ function parseNfcPayload(content) {
     }
   }
 
-  // 3. Fallback: segmentacija od starta payload-a do kraja niza
   try {
     const start = content.indexOf('{"type"');
     if (start !== -1) {
@@ -95,37 +87,51 @@ export default function IntegrationsMarketplace() {
   const [nfcStatus, setNfcStatus] = useState(null);
   const [writingIndex, setWritingIndex] = useState(null);
 
-  async function handleWriteNfc(records, index) {
-    if (typeof window === "undefined" || !("NDEFReader" in window)) {
-      setNfcStatus("WebNFC nije podržan na ovom browseru (potreban Chrome na Android uređaju).");
-      return;
-    }
+  function handleResetTerminal() {
+    setLog([]);
+    setInput("");
+    setNfcStatus(null);
+    setWritingIndex(null);
+    setBackend("nvidia");
+  }
+
+  async function handleTriggerNebiusCrypto(trenutniLog) {
+    setBackend("nebius");
+    const fiksnaKomanda = "dodaj kljuc";
+    const userEntry = { role: "user", content: fiksnaKomanda };
+
+    const noviLog = [...trenutniLog, userEntry];
+    setLog(noviLog);
+    setLoading(true);
 
     try {
-      setWritingIndex(index);
-      setNfcStatus("Prinesi NFC stiker pozadini uređaja...");
-
-      const ndef = new window.NDEFReader();
-      await ndef.write({
-        records: records.map((r) => {
-          if (r.recordType === "url") {
-            return { recordType: "url", data: r.data };
-          }
-          if (r.recordType === "mime") {
-            return { recordType: "mime", mediaType: r.mimeType || "text/plain", data: r.data };
-          }
-          return { recordType: "text", data: r.data };
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          backend: "nebius",
+          mode: mode === "network_scanner" ? "chat" : mode,
+          uloga: mode === "network_scanner" ? "network_scanner" : "default",
+          targetLanguage,
+          messages: noviLog,
         }),
       });
-
-      setNfcStatus("Uspešno upisano na stiker!");
-      setTimeout(() => {
-        setNfcStatus(null);
-        setWritingIndex(null);
-      }, 4000);
+      const data = await res.json();
+      setLog((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data.reply || data.error || "No response from backend.",
+          backend: data.backend,
+        },
+      ]);
     } catch (err) {
-      setNfcStatus(`Greška pri upisu: ${err.message || err}`);
-      setWritingIndex(null);
+      setLog((prev) => [
+        ...prev,
+        { role: "assistant", content: `Request failed: ${err.message}` },
+      ]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -167,6 +173,40 @@ export default function IntegrationsMarketplace() {
     }
   }
 
+  async function handleWriteNfc(records, index) {
+    if (typeof window === "undefined" || !("NDEFReader" in window)) {
+      setNfcStatus("WebNFC nije podržan na ovom browseru (potreban Chrome na Android uređaju).");
+      return;
+    }
+
+    try {
+      setWritingIndex(index);
+      setNfcStatus("Prinesi NFC stiker pozadini uređaja...");
+
+      const ndef = new window.NDEFReader();
+      await ndef.write({
+        records: records.map((r) => {
+          if (r.recordType === "url") {
+            return { recordType: "url", data: r.data };
+          }
+          if (r.recordType === "mime") {
+            return { recordType: "mime", mediaType: r.mimeType || "text/plain", data: r.data };
+          }
+          return { recordType: "text", data: r.data };
+        }),
+      });
+
+      setNfcStatus("Uspešno upisano na stiker!");
+      setTimeout(() => {
+        setNfcStatus(null);
+        setWritingIndex(null);
+      }, 4000);
+    } catch (err) {
+      setNfcStatus(`Greška pri upisu: ${err.message || err}`);
+      setWritingIndex(null);
+    }
+  }
+
   return (
     <section id="marketplace" className="border-t border-cyber-border/70 bg-cyber-panel/40 px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-5xl">
@@ -192,24 +232,38 @@ export default function IntegrationsMarketplace() {
                 Inference Backend
               </p>
               <div className="flex flex-col gap-2">
-                {BACKENDS.map((b) => (
-                  <button
-                    key={b.id}
-                    onClick={() => setBackend(b.id)}
-                    className={clsx(
-                      "flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-left text-xs transition",
-                      backend === b.id
-                        ? "border-cyber-green/50 bg-cyber-green/10 text-cyber-green"
-                        : "border-cyber-border text-cyber-text-dim hover:border-cyber-border hover:text-cyber-text"
-                    )}
-                  >
-                    <Cpu className="h-3.5 w-3.5 shrink-0" />
-                    <span>
-                      <span className="block font-semibold">{b.label}</span>
-                      <span className="block text-[10px] opacity-70">{b.desc}</span>
-                    </span>
-                  </button>
-                ))}
+                <button
+                  onClick={() => setBackend("nvidia")}
+                  className={clsx(
+                    "flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-left text-xs transition",
+                    backend === "nvidia"
+                      ? "border-cyber-green/50 bg-cyber-green/10 text-cyber-green"
+                      : "border-cyber-border text-cyber-text-dim hover:border-cyber-border hover:text-cyber-text"
+                  )}
+                >
+                  <Cpu className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    <span className="block font-semibold">NVIDIA NIM</span>
+                    <span className="block text-[10px] opacity-70">Generate NFC Tag</span>
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleTriggerNebiusCrypto(log)}
+                  disabled={loading}
+                  className={clsx(
+                    "flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-left text-xs transition disabled:opacity-50",
+                    backend === "nebius"
+                      ? "border-cyber-green/50 bg-cyber-green/10 text-cyber-green"
+                      : "border-cyber-border text-cyber-text-dim hover:border-cyber-border hover:text-cyber-text"
+                  )}
+                >
+                  <Key className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    <span className="block font-semibold">NEBIUS TOKEN</span>
+                    <span className="block text-[10px] opacity-70">Add Security Key</span>
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -239,180 +293,200 @@ export default function IntegrationsMarketplace() {
                         : "border-cyber-border text-cyber-text-dim"
                     )}
                   >
-                    <Languages className="h-3.5 w-3.5" /> Translate
+                    <Languages className="h-3.5 w-3.5" />
+                    <span>Translate</span>
                   </button>
                 </div>
 
                 <button
                   onClick={() => setMode("network_scanner")}
                   className={clsx(
-                    "w-full flex items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-xs font-semibold transition",
+                    "flex w-full items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-xs font-semibold transition",
                     mode === "network_scanner"
-                      ? "border-cyber-magenta/50 bg-cyber-magenta/10 text-cyber-magenta"
+                      ? "border-cyber-blue/50 bg-cyber-blue/10 text-cyber-blue shadow-neon-blue"
                       : "border-cyber-border text-cyber-text-dim"
                   )}
                 >
-                  <Globe className="h-3.5 w-3.5" /> Network Scanner (Live Web)
+                  <Radio className={clsx("h-3.5 w-3.5", mode === "network_scanner" && "animate-pulse")} />
+                  <span>Network Scanner (Live Web)</span>
                 </button>
               </div>
+            </div>
 
-              {mode === "translate" && (
+            {mode === "translate" && (
+              <div className="rounded-lg border border-cyber-border bg-cyber-panel p-4">
+                <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-cyber-text-dim">
+                  Target Language
+                </p>
                 <select
                   value={targetLanguage}
                   onChange={(e) => setTargetLanguage(e.target.value)}
-                  className="mt-3 w-full rounded-md border border-cyber-border bg-cyber-panel-2 px-2.5 py-2 text-xs text-cyber-text focus:border-cyber-blue focus:outline-none"
+                  className="w-full rounded-md border border-cyber-border bg-cyber-bg px-2.5 py-1.5 font-mono text-xs text-cyber-text outline-none focus:border-cyber-blue/50"
                 >
                   {LANGUAGES.map((l) => (
-                    <option key={l.code} value={l.code}>
+                    <option key={l.code} value={l.code} className="bg-cyber-bg text-cyber-text">
                       {l.label}
                     </option>
                   ))}
                 </select>
-              )}
+              </div>
+            )}
+
+            <div className="rounded-lg border border-cyber-border/80 bg-cyber-panel/60 p-3">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-cyber-text-dim">
+                <HardDriveDownload className="h-3.5 w-3.5 text-cyber-green" />
+                Chip Capability
+              </p>
+              <p className="mt-1 text-[11px] text-cyber-text-dim/80 leading-relaxed">
+                NVIDIA dynamically generates standard NFC records while NEBIUS token contains SECURE/HMAC. 
+                Synergy of speed of NVIDIA platform and enterprise security of Nebius in one functional NFC record!
+              </p>
+            </div>
+            <div className="rounded-lg border border-cyber-border/80 bg-cyber-panel/60 p-3">
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-cyber-text-dim">
+                  <RefreshCcw className="h-3.5 w-3.5 text-cyber-green" />
+                  Terminal Reset
+                </p>
+                <button
+                  onClick={handleResetTerminal}
+                  className="rounded border border-cyber-green/30 bg-cyber-green/10 px-2 py-0.5 text-[10px] font-mono font-bold text-cyber-green transition hover:bg-cyber-green/20 hover:border-cyber-green/60 active:scale-95"
+                >
+                  PURGE
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-cyber-text-dim/80 leading-relaxed">
+                Clears memory buffer and history matrices for a clean NFC generation cycle.
+              </p>
             </div>
           </div>
 
-          {/* Terminal chat */}
-          <div className="flex flex-col rounded-lg border border-cyber-border bg-black/40">
-            <div className="flex items-center justify-between border-b border-cyber-border/70 px-4 py-2.5">
-              <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-cyber-red/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-cyber-amber/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-cyber-green/70" />
-                <span className="ml-3 font-mono text-[10px] uppercase tracking-widest text-cyber-text-dim">
-                  /api/chat &mdash; {backend} &middot; {mode}
+          {/* Terminal / Chat Area */}
+          <div className="flex h-[600px] flex-col rounded-lg border border-cyber-border bg-cyber-panel overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-cyber-border/80 bg-cyber-bg/70 px-4 py-2.5">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-cyber-red/80 inline-block" />
+                <span className="h-2.5 w-2.5 rounded-full bg-cyber-yellow/80 inline-block" />
+                <span className="h-2.5 w-2.5 rounded-full bg-cyber-green/80 inline-block" />
+                <span className="ml-2 font-mono text-xs text-cyber-text-dim">
+                  /API/CHAT - {backend.toUpperCase()} - {mode.toUpperCase()}
                 </span>
               </div>
-              <span className="font-mono text-[9px] text-cyber-text-dim uppercase tracking-wider hidden sm:inline">
-                WebNFC Ready
-              </span>
+              <div className="flex items-center gap-1.5 rounded border border-cyber-green/30 bg-cyber-green/10 px-2 py-0.5 text-[10px] font-mono text-cyber-green">
+                <Radio className="h-3 w-3 animate-pulse" />
+                <span>WEBNFC READY</span>
+              </div>
             </div>
 
-            <div className="flex h-72 flex-col gap-3 overflow-y-auto px-4 py-4 sm:h-80">
+            {/* Logs Area */}
+            <div className="flex-1 space-y-4 overflow-y-auto p-4 font-mono text-xs scrollbar-thin scrollbar-thumb-cyber-border">
               {log.length === 0 && (
-                <p className="font-mono text-xs text-cyber-text-dim">
-                  &gt; awaiting input... try prompting: &quot;Pripremi navigaciju kolima do aerodroma&quot; or &quot;Napravi vCard kontakt&quot;.
-                </p>
+                <div className="flex h-full items-center justify-center text-center text-cyber-text-dim/60">
+                  <p>&gt; awaiting input... try prompting: &quot;Pripremi navigaciju kolima do aerodroma&quot; ili &quot;Napravi vCard kontakt&quot;.</p>
+                </div>
               )}
-              {log.map((entry, i) => {
-                const nfcPayload = entry.role === "assistant" ? parseNfcPayload(entry.content) : null;
-                const totalBytes = nfcPayload ? calculateNdefBytes(nfcPayload.records) : 0;
-                const isOverNtag213 = totalBytes > 144;
-                const isOverNtag215 = totalBytes > 504;
+
+              {log.map((entry, idx) => {
+                const nfcPayload = parseNfcPayload(entry.content);
+                const bytes = nfcPayload ? calculateNdefBytes(nfcPayload.records) : 0;
+                const bytesLeft = 144 - bytes;
 
                 return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={clsx(
-                      "max-w-[90%] rounded-md px-3 py-2.5 text-xs leading-relaxed",
-                      entry.role === "user"
-                        ? "self-end bg-cyber-green/10 text-cyber-green"
-                        : "self-start bg-cyber-panel-2 text-cyber-text"
-                    )}
-                  >
-                    {nfcPayload ? (
-                      <div className="space-y-2.5">
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-cyber-border/70 pb-2">
-                          <div className="flex items-center gap-1.5 font-mono text-[11px] font-bold text-cyber-magenta">
-                            <Radio className="h-3.5 w-3.5 animate-pulse" />
-                            WEBNFC PAYLOAD
-                          </div>
+                  <div key={idx} className="space-y-1">
+                    <p className={clsx("font-semibold", entry.role === "user" ? "text-cyber-green" : "text-cyber-blue")}>
+                      {entry.role === "user" ? "> user:" : `> core//node (${entry.backend || "system"}):`}
+                    </p>
 
-                          <div className="flex items-center gap-1.5 font-mono text-[10px]">
-                            <span
-                              className={clsx(
-                                "px-1.5 py-0.5 rounded border font-semibold",
-                                !isOverNtag213
-                                  ? "border-cyber-green/60 bg-cyber-green/10 text-cyber-green"
-                                  : !isOverNtag215
-                                  ? "border-cyber-amber/60 bg-cyber-amber/10 text-cyber-amber"
-                                  : "border-cyber-red/60 bg-cyber-red/10 text-cyber-red"
-                              )}
-                            >
-                              {totalBytes} B
-                            </span>
-                            <span className="text-cyber-text-dim">
-                              {!isOverNtag213
-                                ? "NTAG213 (144B)"
-                                : !isOverNtag215
-                                ? "NTAG215 (504B)"
-                                : "NTAG216 (888B)"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="rounded border border-cyber-border bg-black/60 p-2 font-mono text-[10px] text-cyber-text-dim">
-                          <pre className="overflow-x-auto text-cyber-text whitespace-pre-wrap">
-                            {JSON.stringify(nfcPayload.records, null, 2)}
-                          </pre>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-3 pt-1">
-                          <button
-                            onClick={() => handleWriteNfc(nfcPayload.records, i)}
-                            disabled={writingIndex === i}
-                            className="flex items-center gap-2 rounded border border-cyber-magenta/50 bg-cyber-magenta/20 px-3 py-1.5 font-mono text-xs font-semibold text-cyber-magenta transition hover:bg-cyber-magenta/30 disabled:opacity-50"
-                          >
-                            {writingIndex === i ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <HardDriveDownload className="h-3.5 w-3.5" />
-                            )}
-                            Write to NFC Tag
-                          </button>
-
-                          {writingIndex === i && nfcStatus && (
-                            <span className="flex items-center gap-1 font-mono text-[10px] text-cyber-amber">
-                              <AlertTriangle className="h-3 w-3" />
-                              {nfcStatus}
-                            </span>
-                          )}
-
-                          {writingIndex !== i && nfcStatus && (
-                            <span className="flex items-center gap-1 font-mono text-[10px] text-cyber-green">
-                              <CheckCircle2 className="h-3 w-3" />
-                              {nfcStatus}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                    {!nfcPayload ? (
+                      <p className="whitespace-pre-wrap rounded bg-cyber-bg/40 p-2.5 text-cyber-text leading-relaxed border border-cyber-border/40">
+                        {entry.content}
+                      </p>
                     ) : (
-                      entry.content
+                      <div className="rounded border border-cyber-magenta/40 bg-cyber-bg/60 p-3 shadow-neon-magenta/10">
+                        <div className="mb-2 flex items-center justify-between border-b border-cyber-border pb-2">
+                          <span className="flex items-center gap-1.5 font-bold text-cyber-magenta">
+                            <Radio className="h-3.5 w-3.5 animate-pulse" /> WebNFC Payload
+                          </span>
+                          <span className={clsx("text-[10px] font-mono font-bold", bytesLeft < 0 ? "text-cyber-red" : "text-cyber-text-dim")}>
+                            {bytes} B | NTAG213 ({bytesLeft >= 0 ? `${bytesLeft}B left` : `${Math.abs(bytesLeft)}B OVERFLOW`})
+                          </span>
+                        </div>
+
+                        <pre className="max-h-48 overflow-x-auto rounded bg-black/80 p-2.5 font-mono text-[11px] text-cyber-green scrollbar-thin">
+                          {JSON.stringify(nfcPayload, null, 2)}
+                        </pre>
+
+                        <button
+                          onClick={() => handleWriteNfc(nfcPayload.records, idx)}
+                          disabled={writingIndex !== null || bytesLeft < 0}
+                          className="mt-3 flex items-center gap-2 rounded bg-cyber-magenta px-3.5 py-1.5 font-sans text-xs font-bold text-black transition hover:bg-cyber-magenta/80 disabled:opacity-50"
+                        >
+                          {writingIndex === idx ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <HardDriveDownload className="h-3.5 w-3.5" />
+                          )}
+                          Write to NFC Tag
+                        </button>
+                      </div>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
+
               {loading && (
-                <div className="flex items-center gap-2 text-xs text-cyber-text-dim">
+                <div className="flex items-center gap-2 text-cyber-blue font-mono text-xs">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  routing through {backend}
-                  {mode === "network_scanner" && " + capturing live network data..."}...
+                  <span>Compiling grid matrices...</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-2 border-t border-cyber-border/70 p-3">
+            {/* Status Footer */}
+            {nfcStatus && (
+              <div
+                className={clsx(
+                  "border-t px-4 py-2 text-[11px] flex items-center gap-2 font-semibold font-mono",
+                  nfcStatus.includes("Uspešno")
+                    ? "bg-cyber-green/10 border-cyber-green/30 text-cyber-green"
+                    : nfcStatus.includes("Prinesi")
+                    ? "bg-cyber-blue/10 border-cyber-blue/30 text-cyber-blue animate-pulse"
+                    : "bg-cyber-red/10 border-cyber-red/30 text-cyber-red"
+                )}
+              >
+                {nfcStatus.includes("Uspešno") ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                ) : nfcStatus.includes("Prinesi") ? (
+                  <Radio className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+                ) : (
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                )}
+                <span>{nfcStatus}</span>
+              </div>
+            )}
+
+            {/* Input Bar */}
+            <div className="flex items-center gap-2 border-t border-cyber-border bg-cyber-bg/90 p-2.5">
               <input
+                type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                type="text"
                 placeholder={
-                  mode === "network_scanner"
-                    ? "Ask something that requires live web search..."
+                  mode === "translate"
+                    ? "Unesi tekst za instant prevod..."
                     : "npr. Pripremi navigaciju kolima do aerodroma ili Wi-Fi stiker..."
                 }
-                className="flex-1 bg-black/40 font-mono text-xs text-cyber-text placeholder-cyber-text-dim/50 border border-cyber-border rounded-md px-3 py-2 focus:outline-none focus:border-cyber-green/50"
+                disabled={loading}
+                className="flex-1 bg-transparent px-3 py-1.5 font-mono text-xs text-cyber-text outline-none placeholder:text-cyber-text-dim/50 disabled:opacity-50"
               />
               <button
                 onClick={handleSend}
-                disabled={loading}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-cyber-green/40 bg-cyber-green/10 text-cyber-green transition hover:bg-cyber-green/20 disabled:opacity-50"
-                aria-label="Send"
+                disabled={loading || !input.trim()}
+                className="flex h-8 w-8 items-center justify-center rounded bg-cyber-green text-black transition hover:bg-cyber-green/80 disabled:opacity-40"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>

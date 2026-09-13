@@ -1,0 +1,33 @@
+{
+  "deploymentType": "vercel",
+  "templateProjectIds": ["232719"],
+  "vercel": {
+    "env": [
+      {
+        "key": "NVIDIA_NIM_KEY",
+        "description": "Vaš lični NVIDIA NIM API token (nvapi-...)"
+      },
+      {
+        "key": "NEBIUS_API_KEY",
+        "description": "Vaš lični Nebius AI Studio token"
+      },
+      {
+        "key": "TAVILY_API_KEY",
+        "description": "Vaš lični Tavily Search API token"
+      },
+      {
+        "key": "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
+        "description": "Cloud Name sa vašeg Cloudinary dashboard-a"
+      },
+      {
+        "key": "CLOUDINARY_API_KEY",
+        "description": "Cloudinary API Key"
+      },
+      {
+        "key": "CLOUDINARY_API_SECRET",
+        "description": "Cloudinary API Secret"
+      }
+    ]
+  }
+}
+

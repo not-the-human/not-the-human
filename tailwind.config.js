@@ -21,6 +21,7 @@ module.exports = {
         "cyber-magenta": "#ff2fd1",
         "cyber-amber": "#ffb020",
         "cyber-red": "#ff3b5c",
+        "cyber-yellow": "#f5e32f",
         "cyber-text": "#d7fbe8",
         "cyber-text-dim": "#7d93a3",
       },

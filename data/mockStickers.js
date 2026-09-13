@@ -24,7 +24,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/ai/nim-oracle",
     accentColor: "#39ff88",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998935/Untitled_design_12.png", alt: "NIM Oracle sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/nim-oracle-print.pdf", format: "pdf", filename: "nim-oracle-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s2",
@@ -38,7 +38,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/ai/polyglot-node",
     accentColor: "#22d3ee",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998929/Untitled_design_13.png", alt: "Polyglot Node sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/polyglot-node-print.pdf", format: "pdf", filename: "polyglot-node-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s3",
@@ -52,7 +52,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/ai/nebius-relay",
     accentColor: "#ff2fd1",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998134/ChatGPT_Image_Sep_10_2026_01_50_20_AM.png", alt: "Nebius Relay sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/nebius-relay-print.pdf", format: "pdf", filename: "nebius-relay-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s4",
@@ -66,7 +66,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/hooks/wifi-ghost",
     accentColor: "#ffb020",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998351/ChatGPT_Image_Aug_20_2026_11_02_39_PM.png", alt: "WiFi Ghost sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/wifi-ghost-print.pdf", format: "pdf", filename: "wifi-ghost-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s5",
@@ -80,7 +80,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/pranks/rickroll-node",
     accentColor: "#ff3b5c",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998152/ChatGPT_Image_Sep_10_2026_01_49_02_AM.png", alt: "Rickroll Node sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/rickroll-node-print.pdf", format: "pdf", filename: "rickroll-node-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s6",
@@ -94,7 +94,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/pranks/airhorn-trap",
     accentColor: "#ff3b5c",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998260/ChatGPT_Image_Aug_28_2026_06_45_19_AM.png", alt: "Airhorn Trap sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/airhorn-trap-print.pdf", format: "pdf", filename: "airhorn-trap-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s7",
@@ -108,7 +108,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/hooks/vcard-beacon",
     accentColor: "#22d3ee",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998295/ChatGPT_Image_Aug_30_2026_10_12_13_PM.png", alt: "vCard Beacon sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/vcard-beacon-print.pdf", format: "pdf", filename: "vcard-beacon-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s8",
@@ -122,7 +122,7 @@ export const mockStickers = [
     webhookUrl: "https://cyber-nfc-kit.vercel.app/ai/codex-portal",
     accentColor: "#39ff88",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998884/Untitled_design_15.png", alt: "Codex Portal sticker art" },
-    printAsset: { url: "https://res.cloudinary.com/demo/image/upload/fl_attachment/cyber-nfc-kit/codex-portal-print.pdf", format: "pdf", filename: "codex-portal-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
   {
     id: "s9",
@@ -136,7 +136,7 @@ export const mockStickers = [
     webhookUrl: "https://vercel.app",
     accentColor: "#ff007f",
     previewImage: { url: "https://res.cloudinary.com/xs3nq3zj/image/upload/v1788998176/ChatGPT_Image_Sep_6_2026_09_14_38_PM.png", alt: "Network Scanner sticker art" },
-    printAsset: { url: "https://cloudinary.com", format: "pdf", filename: "network-scanner-print.pdf" },
+    printAsset: { url: "https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77" },
   },
 ];
 

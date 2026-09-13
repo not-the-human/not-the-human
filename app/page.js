@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import StickerGrid from "@/components/StickerGrid";
 import IntegrationsMarketplace from "@/components/IntegrationsMarketplace";
+import Footer from "@/components/Footer";
 import { KITS, mockStickers } from "@/data/mockStickers";
 import { isWebNfcSupported } from "@/lib/webnfc";
 
@@ -19,8 +20,6 @@ export default function DashboardPage() {
     setNfcSupported(isWebNfcSupported());
   }, []);
 
-  // Attempt to hydrate from DatoCMS via an internal API route; silently keep
-  // the bundled mock data if the CMS is not configured or the call fails.
   useEffect(() => {
     let cancelled = false;
 
@@ -33,7 +32,7 @@ export default function DashboardPage() {
           setStickers(data.stickers);
         }
       } catch {
-        // DatoCMS not configured / offline - mock data already in state.
+        // DatoCMS not configured / offline
       }
     }
 
@@ -58,9 +57,10 @@ export default function DashboardPage() {
   }, [stickers, activeKit]);
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <Header nfcSupported={nfcSupported} />
 
+      {/* Glavni radni prostor: Sidebar + Main */}
       <div className="flex flex-1">
         <Sidebar
           kits={KITS}
@@ -102,6 +102,9 @@ export default function DashboardPage() {
           <IntegrationsMarketplace />
         </main>
       </div>
-    </>
+
+      {/* Footer se nalazi na samom dnu stranice preko cele širine */}
+      <Footer />
+    </div>
   );
 }

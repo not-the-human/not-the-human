@@ -48,21 +48,21 @@ not-the-human/
 └── .env.example             # Global environment configuration placeholders
 ```
 
-## 🚀 Automatsko Pokretanje (One-Click Deploy)
+## 🚀 One-Click Deploy
 
-Najbrži način da pokrenete sopstvenu instancu ovog projekta jeste klikom na dugme ispod. Vercel će automatski klonirati kod, kreirati novu bazu na vašem DatoCMS nalogu i podići sajt uživo:
+The fastest way to get your own instance of this project up and running is by clicking the button below. Vercel will automatically clone the repository, deploy the site, and guide you through setting up a mirrored template on your DatoCMS account:
 
 [![Deploy with Vercel](https://vercel.com)](https://vercel.com)
 
-### 🔑 Potrebni API Ključevi
-Tokom Vercel instalacije, sistem će od vas tražiti da unesete sopstvene (lične) API ključeve za AI i medijske module. Možete ih besplatno ili uz početni kredit preuzeti ovde:
+### 🔑 Required API Keys
+During the Vercel deployment process, the system will prompt you to enter your personal API keys for the AI and media modules. You can grab them here (most offer free tiers or starting credits):
 
-* **NVIDIA_NIM_KEY** – Napravite nalog na [NVIDIA Build](https://nvidia.com) i generišite svoj `nvapi-...` ključ.
-* **NEBIUS_API_KEY** – Otvorite nalog na [Nebius AI Studio](https://nebius.com) i kreirajte API token.
-* **TAVILY_API_KEY** – Registrujte se na [Tavily AI](https://tavily.com) za funkciju Live Network Scanner-a.
-* **Cloudinary Ključevi** – Registrujte besplatan nalog na [Cloudinary](https://cloudinary.com). Sa glavnog Dashboard-a prepišite **Cloud Name**, **API Key** i **API Secret** u odgovarajuća Vercel polja (`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
+* **NVIDIA_NIM_KEY** – Create an account on [NVIDIA Build](https://nvidia.com) and generate your `nvapi-...` key.
+* **NEBIUS_API_KEY** – Sign up at [Nebius AI Studio](https://nebius.com) and create an API token in your settings.
+* **TAVILY_API_KEY** – Register at [Tavily AI](https://tavily.com) to get your key for the Live Network Scanner functionality.
+* **Cloudinary Keys** – Sign up for a free account on [Cloudinary](https://cloudinary.com). Copy the **Cloud Name**, **API Key**, and **API Secret** from your main dashboard and paste them into the corresponding Vercel environment variables (`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
 
-*Napomena: API ključ za DatoCMS (`DATOCMS_TOKEN`) ne morate tražiti ručno. Vercel i DatoCMS integracija će ga automatski kreirati i povezati u pozadini tokom same instalacije.*
+*Note: You do not need to manually generate a DatoCMS API key (`DATOCMS_TOKEN`). The Vercel and DatoCMS integration will automatically create and link it behind the scenes during deployment.*
 
 
 ---

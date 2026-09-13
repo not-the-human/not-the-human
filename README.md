@@ -6,6 +6,11 @@ This project transforms ordinary, cheap physical NFC tags (NTAG213/215) into har
 
 ---
 
+### 🖨️ Physical Assets & Print Sheets
+- **Asset Hub:** [Digital Soul Cloudinary Collection](https://collection.cloudinary.com/xs3nq3zj/5ae1bd7cdf95b134cd6a2311787c0e77)
+- **License:** **Free for personal use** (non-commercial).
+- **Specs:** 300 DPI transparent PNGs, aligned for A3 print sheets and standard 25mm–30mm NTAG213/NTAG215 adhesive tags.
+
 ## 🚀 Key Features
 
 - **Spotify-Style Dashboard Layout:** Sticky sidebar (desktop) and reactive bottom navigation (mobile) for instant tag kit filtering: *AI Portals, Utility Hooks, Media/Pranks, and All Kits*.

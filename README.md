@@ -48,6 +48,23 @@ not-the-human/
 └── .env.example             # Global environment configuration placeholders
 ```
 
+## 🚀 Automatsko Pokretanje (One-Click Deploy)
+
+Najbrži način da pokrenete sopstvenu instancu ovog projekta jeste klikom na dugme ispod. Vercel će automatski klonirati kod, kreirati novu bazu na vašem DatoCMS nalogu i podići sajt uživo:
+
+[![Deploy with Vercel](https://vercel.com)](https://vercel.com)
+
+### 🔑 Potrebni API Ključevi
+Tokom Vercel instalacije, sistem će od vas tražiti da unesete sopstvene (lične) API ključeve za AI i medijske module. Možete ih besplatno ili uz početni kredit preuzeti ovde:
+
+* **NVIDIA_NIM_KEY** – Napravite nalog na [NVIDIA Build](https://nvidia.com) i generišite svoj `nvapi-...` ključ.
+* **NEBIUS_API_KEY** – Otvorite nalog na [Nebius AI Studio](https://nebius.com) i kreirajte API token.
+* **TAVILY_API_KEY** – Registrujte se na [Tavily AI](https://tavily.com) za funkciju Live Network Scanner-a.
+* **Cloudinary Ključevi** – Registrujte besplatan nalog na [Cloudinary](https://cloudinary.com). Sa glavnog Dashboard-a prepišite **Cloud Name**, **API Key** i **API Secret** u odgovarajuća Vercel polja (`NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
+
+*Napomena: API ključ za DatoCMS (`DATOCMS_TOKEN`) ne morate tražiti ručno. Vercel i DatoCMS integracija će ga automatski kreirati i povezati u pozadini tokom same instalacije.*
+
+
 ---
 
 ## 🛠️ Getting Started & Local Installation
